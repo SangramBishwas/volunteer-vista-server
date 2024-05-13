@@ -32,15 +32,11 @@ async function run() {
         await client.connect();
 
         const postCollections = client.db("volunteerDB").collection("posts");
+        const requestCollections = client.db("volunteerDB").collection("requests");
 
         app.get('/posts', async (req, res) => {
             const cursor = postCollections.find();
             const result = await cursor.toArray();
-            res.send(result);
-        })
-        app.post('/posts', async (req, res) => {
-            const newPost = req.body;
-            const result = await postCollections.insertOne(newPost);
             res.send(result);
         })
 
@@ -58,10 +54,35 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/myRequests/:email', async (req, res) => {
+            const query = { email: req.params.email };
+            const result = await requestCollections.find(query).toArray();
+            res.send(result);
+        })
+
+        app.post('/posts', async (req, res) => {
+            const newPost = req.body;
+            const result = await postCollections.insertOne(newPost);
+            res.send(result);
+        })
+
+        app.post('/requests', async (req, res) => {
+            const newRequest = req.body;
+            const result = await requestCollections.insertOne(newRequest);
+            res.send(result)
+        })
+
         app.delete('/posts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await postCollections.deleteOne(query);
+            res.send(result);
+
+        })
+        app.delete('/requests/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await requestCollections.deleteOne(query);
             res.send(result);
 
         })
