@@ -1,30 +1,31 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookeParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-require('dotenv').config();
+
 const app = express();
 const port = process.env.PORT || 5000;
 
 //middleware
-const corsOptions = {
+
+
+app.use(cors({
     origin: [
         'http://localhost:5173',
-        'http://assignment-11-7da79.web.app',
-        'http://assignment-11-7da79.firebaseapp.com'
+        'https://assignment-11-7da79.web.app',
+        'https://assignment-11-7da79.firebaseapp.com'
     ],
-    credentials: true, // Allow credentials
-};
-
-app.use(cors(corsOptions));
+    credentials: true,
+}));
 app.use(express.json());
 app.use(cookeParser())
 
-const logger = (req, res, next) => {
-    console.log(req.method, req.url);
-    next()
-}
+// const logger = (req, res, next) => {
+//     console.log(req.method, req.url);
+//     next()
+// }
 
 const verifyToken = (req, res, next) => {
     const token = req?.cookies?.token;
@@ -67,17 +68,25 @@ async function run() {
         const requestCollections = client.db("volunteerDB").collection("requests");
 
         //auth api
-        app.post('/jwt', logger, async (req, res) => {
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '1d',
             })
-            res.cookie('token', token, cookieOption).send({ success: true })
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production' ? true : false,
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            }).send({ success: true })
         })
 
         app.post('/logout', async (req, res) => {
             const user = req.body;
-            res.clearCookie('token', { ...cookieOption, maxAge: 0 })
+            res.clearCookie('token', {
+                maxAge: 0,
+                secure: process.env.NODE_ENV === 'production' ? true : false,
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            })
                 .send({ success: true })
         })
 
@@ -88,7 +97,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/posts/:id', logger, async (req, res) => {
+        app.get('/posts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await postCollections.findOne(query);
@@ -96,7 +105,7 @@ async function run() {
 
         })
 
-        app.get('/myPost/:email', logger, verifyToken, async (req, res) => {
+        app.get('/myPost/:email', verifyToken, async (req, res) => {
             // console.log('token owner info:', req.user)
             if (req.user.email !== req.params.email) {
                 return res.status(403).send({ message: 'forbidden access' })
@@ -106,7 +115,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/myRequests/:email', logger, verifyToken, async (req, res) => {
+        app.get('/myRequests/:email', verifyToken, async (req, res) => {
 
             if (req.user.email !== req.params.email) {
                 return res.status(403).send({ message: 'forbidden access' })
@@ -122,7 +131,7 @@ async function run() {
             res.send(result);
         })
 
-        app.post('/requests', logger, async (req, res) => {
+        app.post('/requests', async (req, res) => {
             const newRequest = req.body;
             const result = await requestCollections.insertOne(newRequest);
             res.send(result)
