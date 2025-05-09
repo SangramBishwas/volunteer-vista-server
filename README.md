@@ -40,25 +40,22 @@ Visit the live application: [Volunteer Vista](https://volunteer-vista-server.ver
 
 ## 🚀 Installation Process
 
+### Prerequisites
+
+- Node.js and npm installed
+- MongoDB instance (local or cloud e.g., MongoDB Atlas)
+
 Follow these steps to run the project locally:
 
 ### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/SangramBishwas/volunteer-vista-server.git
-cd craft-haven-client
+cd volunteer-vista-server
 
 ```
 
----
-### 2. Configureation 
-/.env
-```bash
-DB_USER=volunteerOrganization
-DB_PASS=tfPXm5fqhtx3hBfl
-ACCESS_TOKEN_SECRET=4b3b748146e3025cb7f917e33550f23b33032feae37d96906081cf5d0033
-```
-### 3. Setup
+### 2. Setup
 ```bash
 npm install
 
