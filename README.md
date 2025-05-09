@@ -38,8 +38,6 @@ Visit the live application: [Volunteer Vista](https://volunteer-vista-server.ver
 
 ---
 
-## 📁 Project Structure
-
 ## 🚀 Installation Process
 
 Follow these steps to run the project locally:
